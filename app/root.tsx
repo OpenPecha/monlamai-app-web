@@ -16,7 +16,6 @@ import {
   ScrollRestoration,
   useLoaderData,
   useLocation,
-  useFetcher,
 } from "@remix-run/react";
 import Footer from "./component/layout/Footer";
 import Header from "./component/layout/Header";
@@ -28,11 +27,16 @@ import { getUser } from "./modal/user.server";
 import toastStyle from "react-toastify/dist/ReactToastify.css";
 import feedBucketStyle from "~/styles/feedbucket.css";
 import { ToastContainer } from "react-toastify";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import useLocalStorage from "./component/hooks/useLocaleStorage";
 import FeedBucket from "./component/FeedBucket";
 import LocationComponent from "./component/LocationDetect";
-import unleash from "./services/features.server";
+import {
+  isJobEnabled,
+  enable_replacement_mt,
+  show_about_lama,
+  file_upload_enable,
+} from "./services/features.server";
 
 import { saveIpAddress } from "~/modal/log.server";
 import getIpAddressByRequest from "~/component/utils/getIpAddress";
@@ -40,19 +44,14 @@ import { ErrorPage } from "./component/ErrorPages";
 import { sessionStorage } from "~/services/session.server";
 import { AppInstaller } from "~/component/AppInstaller.client";
 import { ClientOnly } from "remix-utils/client-only";
-import useDetectPWA from "~/component/hooks/useDetectPWA";
 import { update_pwa } from "~/modal/user.server";
 import { userPrefs } from "~/services/cookies.server";
 
-export const loader: LoaderFunction = async ({ request }) => {
+export const loader: LoaderFunction = async ({ request, context }) => {
   let userdata = await getUserSession(request);
   const feedBucketAccess = process.env.FEEDBUCKET_ACCESS;
   const feedbucketToken = process.env.FEEDBUCKET_TOKEN;
   let user = userdata ? await getUser(userdata?._json?.email) : null;
-  const isJobEnabled = unleash.isEnabled("isJobEnabled");
-  const enable_replacement_mt = unleash.isEnabled("enable_replacement_mt");
-  const show_about_lama = unleash.isEnabled("show_about_lama");
-  const file_upload_enable = unleash.isEnabled("file_upload_enable");
 
   const cookieHeader = request.headers.get("Cookie");
   const cookie = (await userPrefs.parse(cookieHeader)) || {};
@@ -165,41 +164,10 @@ function Document({ children }: { children: React.ReactNode }) {
   );
 }
 
-const getDeviceInfo = () => {
-  const userAgent = navigator.userAgent || navigator.vendor || window.opera;
-  const isStandalone =
-    window.matchMedia("(display-mode: standalone)").matches ||
-    window.navigator.standalone;
-  const isPWA = isStandalone ? "PWA" : "Browser";
-
-  const isAndroid = /android/i.test(userAgent) && !/windows/i.test(userAgent);
-  const isIOS = /iPad|iPhone|iPod/.test(userAgent) && !window.MSStream;
-  const isMac = /Macintosh|MacIntel|MacPPC|Mac68K/.test(userAgent) && !isIOS;
-  const isWindows = /Windows/.test(userAgent);
-
-  let deviceType = "Desktop";
-  if (isAndroid) {
-    deviceType = "Android";
-  } else if (isIOS) {
-    deviceType = "iOS";
-  } else if (isMac) {
-    deviceType = "Mac";
-  } else if (isWindows) {
-    deviceType = "Windows";
-  }
-
-  return {
-    userAgent,
-    isPWA,
-    deviceType,
-  };
-};
-
 export default function App() {
   let { user } = useLoaderData();
   let [isDarkMode, setIsDarkMode] = useLocalStorage("Darktheme", false);
-  const isPWA = useDetectPWA();
-  const fetcher = useFetcher();
+
   useEffect(() => {
     if (isDarkMode) {
       document.documentElement.classList.add("dark");
@@ -207,11 +175,6 @@ export default function App() {
       document.documentElement.classList.remove("dark");
     }
   }, []);
-
-  // useEffect(() => {
-  //   let { deviceType: device } = getDeviceInfo();
-  //   fetcher.submit({ userId: user?.id, isPWA, device }, { method: "POST" });
-  // }, [isPWA]);
 
   return (
     <Document>

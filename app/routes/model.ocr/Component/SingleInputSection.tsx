@@ -6,7 +6,7 @@ import {
   Spinner,
   ToggleSwitch,
 } from "flowbite-react";
-import React, { useEffect, useState } from "react";
+import { useState } from "react";
 import { resetFetcher } from "~/component/utils/resetFetcher";
 import { useFetcher, useLoaderData } from "@remix-run/react";
 import axios from "axios";
@@ -14,7 +14,6 @@ import { EditActionButtons } from "~/routes/model.mt/components/UtilityComponent
 import EditDisplay from "~/component/EditDisplay";
 import CardComponent from "~/component/Card";
 import { NonEditButtons } from "~/component/ActionButtons";
-import TooltipComponent from "./Tooltip";
 import { ImageCropper } from "~/routes/model.ocr/Component/ImageCropper";
 import Devider from "~/component/Devider";
 import uselitteraTranlation from "~/component/hooks/useLitteraTranslation";
@@ -138,7 +137,6 @@ function SingleInptSection({ fetcher }: any) {
         className={`${isTibetan ? "font-monlam" : "font-poppins"}`}
       >
         <div className="w-full relative h-full min-h-[30vh] md:min-h-[45vh] flex flex-col items-center justify-center  gap-5">
-          {/* <TooltipComponent /> */}
           <div className="w-full h-full flex flex-col flex-1">
             {ImageUrl && (
               <img src={ImageUrl} onLoad={handleSubmit} className="hidden" />
@@ -176,15 +174,6 @@ function SingleInptSection({ fetcher }: any) {
                 />
               )}
               <div className="text-lg tracking-wide leading-loose">
-                {/* {errorMessage && (
-                  <div
-                    className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative"
-                    role="alert"
-                  >
-                    <strong className="font-bold">Error: </strong>
-                    <span className="block sm:inline">{errorMessage}</span>
-                  </div>
-                )} */}
                 {errorMessage && (
                   <ErrorMessage
                     message={errorMessage}

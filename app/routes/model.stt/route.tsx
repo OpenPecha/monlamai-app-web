@@ -35,6 +35,7 @@ import { Spinner, Progress } from "flowbite-react";
 import Devider from "~/component/Devider";
 import { ErrorBoundary } from "~/component/ErrorPages";
 import uselitteraTranlation from "~/component/hooks/useLitteraTranslation";
+import { shouldFetchInferenceList } from "../model.mt/route";
 
 export const meta: MetaFunction<typeof loader> = ({ matches }) => {
   const parentMeta = matches.flatMap((match) => match.meta ?? []);
@@ -49,9 +50,11 @@ export async function loader({ request }: LoaderFunctionArgs) {
   if (userdata) {
     user = await getUser(userdata?._json.email);
   }
-  let inferences = await getUserFileInferences({
-    userId: user?.id,
-    model: "stt",
+  let model = "stt";
+  let inferences = await shouldFetchInferenceList({
+    request,
+    user,
+    model,
   });
   return { user, fileUploadUrl: process.env?.FILE_SUBMIT_URL, inferences };
 }

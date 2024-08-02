@@ -78,6 +78,9 @@ export const action: ActionFunction = async ({ request }) => {
       let res = await fetch(URL_File + "/ocr/zip", {
         method: "POST",
         body: formData,
+        headers: {
+          "x-api-key": process.env?.API_ACCESS_KEY!,
+        },
       });
       let job = await res.json();
 
@@ -96,6 +99,7 @@ export const action: ActionFunction = async ({ request }) => {
       output: "",
       ip,
     });
+    console.log(inferenceData);
     try {
       let formData = new FormData();
       formData.append("PDFurls", PDFurls);
@@ -104,9 +108,12 @@ export const action: ActionFunction = async ({ request }) => {
       let res = await fetch(URL_File + "/ocr/pdf", {
         method: "POST",
         body: formData,
+        headers: {
+          "x-api-key": process.env?.API_ACCESS_KEY!,
+        },
       });
       job = await res.json();
-
+      console.log(job);
       return PDFurls;
     } catch (e) {
       return { error: FILE_SERVER_ISSUE_MESSAGE };

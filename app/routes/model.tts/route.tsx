@@ -20,7 +20,6 @@ import { CharacterOrFileSizeComponent } from "../model.mt/components/UtilityComp
 import { ErrorMessage } from "~/component/ErrorMessage";
 import CardComponent from "~/component/Card";
 import { getUser } from "~/modal/user.server";
-import { getUserFileInferences } from "~/modal/inference.server";
 import { TtsSubmitButton } from "./components/UtilityComponents";
 import { toast } from "react-toastify";
 import { getUserSession } from "~/services/session.server";
@@ -30,6 +29,7 @@ import HeaderComponent from "../../component/HeaderComponent";
 import Devider from "~/component/Devider";
 import AudioPlayer from "./components/AudioPlayer";
 import { ErrorBoundary } from "~/component/ErrorPages";
+import { shouldFetchInferenceList } from "../model.mt/route";
 
 export const meta: MetaFunction = ({ matches }) => {
   const parentMeta = matches.flatMap((match) => match.meta ?? []);
@@ -45,9 +45,11 @@ export async function loader({ request }: LoaderFunctionArgs) {
     user = await getUser(userdata?._json.email);
   }
 
-  let inferences = await getUserFileInferences({
-    userId: user?.id,
-    model: "tts",
+  let model = "tts";
+  let inferences = await shouldFetchInferenceList({
+    request,
+    user,
+    model,
   });
   let CHAR_LIMIT = parseInt(process.env?.MAX_TEXT_LENGTH_TTS!);
 

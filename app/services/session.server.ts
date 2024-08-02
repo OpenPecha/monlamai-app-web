@@ -1,4 +1,4 @@
-import { createCookieSessionStorage } from "@remix-run/node";
+import { createCookieSessionStorage, createCookie } from "@remix-run/node";
 import { getUser } from "~/modal/user.server";
 import jwt from "jsonwebtoken";
 // export the whole sessionStorage object
@@ -54,5 +54,13 @@ export async function verify_token(token: string) {
   });
   return true;
 }
+
+export let returnToCookie = createCookie("return-to", {
+  path: "/",
+  httpOnly: true,
+  sameSite: "lax",
+  maxAge: 60, // 1 minute because it makes no sense to keep it for a long time
+  secure: process.env.NODE_ENV === "production",
+});
 
 export let { getSession, commitSession, destroySession } = sessionStorage;

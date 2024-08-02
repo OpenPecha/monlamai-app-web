@@ -6,7 +6,7 @@ const { createRequestHandler } = require("@remix-run/express");
 const compression = require("compression");
 const express = require("express");
 const morgan = require("morgan");
-const crypto = require("crypto");
+const axios = require("axios");
 
 const MODE = process.env.NODE_ENV;
 const BUILD_DIR = path.join(process.cwd(), "build");
@@ -15,6 +15,7 @@ if (!fs.existsSync(BUILD_DIR)) {
     "Build directory doesn't exist, please run `npm run dev` or `npm run build` before starting the server."
   );
 }
+
 const app = express();
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -39,16 +40,21 @@ app.use(
   "/build",
   express.static("public/build", { immutable: true, maxAge: "1y" })
 );
-app.use(morgan("tiny"));
+app.use(morgan("combined"));
 
 app.all(
   "*",
   MODE === "production"
-    ? createRequestHandler({ build: require("./build") })
+    ? createRequestHandler({
+        build: require("./build"),
+      })
     : (req, res, next) => {
         purgeRequireCache();
         const build = require("./build");
-        return createRequestHandler({ build, mode: MODE })(req, res, next);
+        return createRequestHandler({
+          build,
+          mode: MODE,
+        })(req, res, next);
       }
 );
 

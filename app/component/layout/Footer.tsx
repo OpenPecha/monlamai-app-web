@@ -62,6 +62,7 @@ function Footer() {
                 rel="noreferrer"
                 className={`mr-2 hover:underline md:mr-3 transition-all duration-500 `}
                 style={{ color: logo.color, fontSize: 26 }}
+                aria-label={logo.name}
               >
                 {logo.icon}
               </a>

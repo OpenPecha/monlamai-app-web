@@ -14,7 +14,6 @@ import { useState, useRef, useEffect } from "react";
 import useDebounce from "~/component/hooks/useDebounceState";
 import { ErrorMessage } from "~/component/ErrorMessage";
 import ToolWraper from "~/component/ToolWraper";
-import DownloadDocument from "~/routes/model.mt/components/DownloadDocument";
 import {
   getTodayInferenceByUserIdCountModel,
   getUserFileInferences,
@@ -40,7 +39,6 @@ import { CancelButton } from "~/component/Buttons";
 import { RxCross2 } from "react-icons/rx";
 import useTranslate from "./lib/useTranslate";
 import { getUserSession } from "~/services/session.server";
-import ImageTranslateComponent from "./components/ImageTranslateComponent";
 import { InferenceList } from "~/component/InferenceList";
 import Devider from "~/component/Devider";
 import { Spinner } from "flowbite-react";
@@ -53,11 +51,33 @@ export const meta: MetaFunction<typeof loader> = ({ matches }) => {
   return [{ title: "Monlam | ཡིག་སྒྱུར་རིག་ནུས།" }, ...parentMeta];
 };
 
+export const shouldFetchInferenceList = async ({
+  request,
+  user,
+  model,
+}: {
+  request: Request;
+  user: any;
+  model: string;
+}) => {
+  let tool = new URL(request.url).searchParams.get("tool");
+  const fileList = ["document", "file"];
+  let fetchInferenceList = fileList.includes(tool!);
+
+  return user && fetchInferenceList
+    ? await getUserFileInferences({
+        userId: user?.id,
+        model,
+      })
+    : null;
+};
+
 export async function loader({ request }: LoaderFunctionArgs) {
   let userdata = await getUserSession(request);
   let user = await getUser(userdata?._json.email);
+  let model = "mt";
   let checkNumberOfInferenceToday = user
-    ? await getTodayInferenceByUserIdCountModel(user?.id, "mt")
+    ? await getTodayInferenceByUserIdCountModel(user?.id, model)
     : null;
   let checkLimit = checkNumberOfInferenceToday
     ? checkNumberOfInferenceToday >= parseInt(process.env?.API_HIT_LIMIT!)
@@ -66,14 +86,12 @@ export async function loader({ request }: LoaderFunctionArgs) {
   let limitMessage =
     "You have reached the daily limit of translation. Please try again tomorrow.";
 
-  let inferences = user
-    ? await getUserFileInferences({
-        userId: user?.id,
-        model: "mt",
-      })
-    : null;
   const userAgent = request.headers.get("User-Agent") || "";
-
+  const inferences = await shouldFetchInferenceList({
+    request,
+    user,
+    model,
+  });
   const isMobile =
     /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
       userAgent
@@ -149,7 +167,6 @@ export default function Index() {
 
   const [file, setFile] = useState<File | null>(null);
   const { limitMessage, CHAR_LIMIT, user } = useLoaderData();
-  const { csrfToken } = useRouteLoaderData("root");
 
   const [edit, setEdit] = useState(false);
   const [editText, setEditText] = useState("");
@@ -201,7 +218,6 @@ export default function Index() {
     text: sourceText,
     data,
     setData,
-    csrfToken,
   });
   useEffect(() => {
     if (done === true && data) {
@@ -219,11 +235,13 @@ export default function Index() {
       );
       resetFetcher(editfetcher);
     }
+  }, [done]);
+  useEffect(() => {
     if (charCount === 0) {
       resetFetcher(editfetcher);
       setData("");
     }
-  }, [done, charCount]);
+  }, [charCount]);
   let inferenceId = savefetcher.data?.id;
 
   const handleReset = () => {
@@ -403,8 +421,6 @@ export default function Index() {
           </div>
         )}
       </div>
-
-      {selectedTool === "image" && <ImageTranslateComponent />}
 
       <div className="font-poppins mt-3 mb-20 w-full text-center text-[0.7rem] text-xs text-slate-400 md:float-right md:w-fit">
         Monlam-MITRA{" "}

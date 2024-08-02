@@ -2,8 +2,7 @@ import { useFetcher, useSearchParams } from "@remix-run/react";
 import { useEffect, useState } from "react";
 import ListInput from "~/component/ListInput";
 import SingleInputSection from "./SingleInputSection";
-import PDFInputSection from "./PDFInputSection";
-import ZipInputSection from "./ZipInputSection";
+import FileInputSection from "./FileInputSection";
 import { resetFetcher } from "~/component/utils/resetFetcher";
 import HeaderComponent from "~/component/HeaderComponent";
 
@@ -42,7 +41,7 @@ function OCR() {
         {selectedTool === "image" && (
           <SingleInputSection fetcher={SingleFilefetcher} />
         )}
-        {selectedTool === "file" && <PDFInputSection fetcher={fileFetcher} />}
+        {selectedTool === "file" && <FileInputSection fetcher={fileFetcher} />}
       </div>
     </div>
   );

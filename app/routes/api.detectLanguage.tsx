@@ -1,12 +1,6 @@
 import { ActionFunction, json } from "@remix-run/node";
-import { verifyDomain } from "~/component/utils/verifyDomain";
 
 export const action: ActionFunction = async ({ request }) => {
-  const isDomainAllowed = verifyDomain(request);
-  if (!isDomainAllowed) {
-    // If the referer is not from the expected domain, return a forbidden response
-    return json({ message: "Access forbidden" }, { status: 403 });
-  }
   if (request.method !== "POST") {
     return json({ error: "Method not allowed" }, 405);
   }

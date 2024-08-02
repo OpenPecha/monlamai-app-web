@@ -3,29 +3,8 @@ import React, { useEffect, useMemo, useState, useRef } from "react";
 import { FaPause } from "react-icons/fa6";
 import { ICON_SIZE } from "~/helper/const";
 import { HiMiniSpeakerWave } from "react-icons/hi2";
-function useAudioPlayer(audioRef, fetcherData) {
-  const [isPlaying, setIsPlaying] = useState(false);
-
-  useEffect(() => {
-    if (fetcherData) {
-      audioRef.current?.play();
-      setIsPlaying(true);
-    }
-    return () => {
-      if (!audioRef.current?.paused) {
-        audioRef.current?.pause();
-        setIsPlaying(false);
-      }
-    };
-  }, [fetcherData, audioRef]);
-
-  const pauseAudio = () => {
-    audioRef.current?.pause();
-    setIsPlaying(false);
-  };
-
-  return { isPlaying, pauseAudio };
-}
+import { Spinner } from "flowbite-react";
+import useAudioPlayer from "./hooks/useAudioPlayer";
 
 function Speak({
   text,
@@ -56,20 +35,25 @@ function Speak({
           <FaPause size={ICON_SIZE} className="dark:fill-primary-500" />
         </div>
       ) : (
-        <div
-          onClick={handlePlayClick}
-          className={`flex items-center cursor-pointer  ${
-            fetcher.state !== "idle" ? "animate-pulse" : ""
-          }`}
-        >
-          <HiMiniSpeakerWave
-            size={ICON_SIZE}
-            className="dark:fill-primary-500"
-          />
-          {fetcher.state !== "idle" && (
-            <div className="speaker_loading  ml-2"></div>
+        <>
+          {fetcher.state !== "idle" ? (
+            <Spinner
+              size="md"
+              className={"fill-secondary-500 dark:fill-primary-500"}
+            />
+          ) : (
+            // <div className="speaker_loading  ml-2"></div>
+            <div
+              onClick={handlePlayClick}
+              className="flex items-center cursor-pointer"
+            >
+              <HiMiniSpeakerWave
+                size={ICON_SIZE}
+                className="dark:fill-primary-500"
+              />
+            </div>
           )}
-        </div>
+        </>
       )}
       {fetcher.data && (
         <audio

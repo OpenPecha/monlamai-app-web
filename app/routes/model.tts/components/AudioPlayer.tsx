@@ -10,7 +10,7 @@ const AudioPlayer = ({ audioURL }) => {
   const [volume, setVolume] = useLocalStorage("volume", 1);
 
   const containerRef = useRef(null);
-  let setting = useRef();
+  const setting = useRef(null);
 
   const { wavesurfer, isPlaying, currentTime } = useWavesurfer({
     container: containerRef,
@@ -23,7 +23,6 @@ const AudioPlayer = ({ audioURL }) => {
     barWidth: 4,
   });
   const maxDuration = wavesurfer?.getDuration();
-  console.log(currentTime, maxDuration);
 
   const changePlaybackRate = () => {
     const rates = [1, 1.25, 1.5, 2, 0.5];
@@ -33,26 +32,24 @@ const AudioPlayer = ({ audioURL }) => {
     setPlaybackRate(newRate);
   };
 
+  const handleVolumeChange = (e) => {
+    const newVolume = parseFloat(e.target.value);
+    setVolume(newVolume);
+  };
+
+  useEffect(() => {
+    if (wavesurfer) {
+      const media = wavesurfer?.getMediaElement();
+      media.crossOrigin = "anonymous";
+      amplifyMedia(media, volume * 20, setting);
+    }
+  }, [volume, wavesurfer]);
+
   useEffect(() => {
     if (wavesurfer) {
       wavesurfer.setPlaybackRate(playbackRate);
     }
-  }, [playbackRate]);
-
-  const handleVolumeChange = (e) => {
-    const newVolume = parseFloat(e.target.value);
-    setVolume(newVolume);
-    if (wavesurfer) {
-      wavesurfer.setVolume(newVolume);
-    }
-  };
-
-  useEffect(() => {
-    if (wavesurfer && !setting.current && audioURL) {
-      const media = wavesurfer?.getMediaElement();
-      setting.current = amplifyMedia(media, volume);
-    }
-  }, []);
+  }, [playbackRate, wavesurfer]);
 
   const formatTime = (seconds) => {
     const minutes = Math.floor(seconds / 60);
@@ -121,7 +118,6 @@ const AudioPlayer = ({ audioURL }) => {
       <div className="flex flex-1 flex-col justify-between gap-2">
         {/* Placeholder for the waveform */}
         <div className="my-auto" ref={containerRef} />
-
         <div className="flex items-center justify-between gap-5">
           <button
             onClick={() => {

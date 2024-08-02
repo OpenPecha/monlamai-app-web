@@ -17,7 +17,7 @@ type props = {
   fetcher: any;
 };
 
-export default function PDFInputSection({ fetcher }: props) {
+export default function FileInputSection({ fetcher }: props) {
   const [file, setFile] = useState<File | null>(null);
   const [fileName, setFileName] = useState("");
   const [filePath, setFilePath] = useState<string | null>();

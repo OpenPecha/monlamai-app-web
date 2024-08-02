@@ -10,15 +10,13 @@ function Sponsors() {
       <div className="flex gap-4 justify-center flex-wrap">
         {sponsor_list.map((sponsor, id) => {
           return (
-            <div
-              className="my-4 dark:bg-gray-200 dark:rounded-lg"
-              key={sponsor}
-            >
+            <div className="my-4 bg-primary-50 rounded-lg" key={sponsor}>
               <img
                 loading="lazy"
                 src={sponsor}
                 className="w-[9rem] p-3 object-contain hover:scale-110 transition-all duration-700"
                 style={{ mixBlendMode: "darken" }}
+                alt="sponsors"
               />
             </div>
           );

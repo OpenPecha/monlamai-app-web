@@ -10,7 +10,6 @@ import {
   en_bo_english_replaces,
   en_bo_tibetan_replaces,
 } from "~/component/utils/replace";
-import { verifyDomain } from "~/component/utils/verifyDomain";
 import { API_ERROR_MESSAGE } from "~/helper/const";
 import { saveInference } from "~/modal/inference.server";
 import { getUser } from "~/modal/user.server";
@@ -76,12 +75,9 @@ export async function translate(
 
 export const action = async ({ request }: ActionFunctionArgs) => {
   let userdata = await getUserDetail(request);
-  const isDomainAllowed = verifyDomain(request);
+
   let ip = getIpAddressByRequest(request);
-  if (!isDomainAllowed) {
-    // If the referer is not from the expected domain, return a forbidden response
-    return json({ message: "Access forbidden" }, { status: 403 });
-  }
+
   let user = await getUser(userdata?._json.email);
   let formdata = await request.formData();
   const sourceLang = formdata.get("sourceLang") as "bo" | "en";

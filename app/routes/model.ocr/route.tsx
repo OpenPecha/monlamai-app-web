@@ -4,7 +4,7 @@ import type {
   LoaderFunctionArgs,
   MetaFunction,
 } from "@remix-run/node";
-import { ErrorBoundary } from "../model.mt/route";
+import { ErrorBoundary, shouldFetchInferenceList } from "../model.mt/route";
 import ToolWraper from "~/component/ToolWraper";
 import OCR from "./Component/OCR";
 import { getUserFileInferences, updateEdit } from "~/modal/inference.server";
@@ -22,14 +22,15 @@ export const links: LinksFunction = () => [
 ];
 export async function loader({ request }: LoaderFunctionArgs) {
   let userdata = await getUserSession(request);
-
+  let model = "ocr";
   let user = null;
   if (userdata) {
     user = await getUser(userdata?._json.email);
   }
-  let inferenceList = await getUserFileInferences({
-    userId: user?.id,
-    model: "ocr",
+  let inferenceList = await shouldFetchInferenceList({
+    request,
+    model,
+    user,
   });
   const userAgent = request.headers.get("User-Agent") || "";
   const isMobile =

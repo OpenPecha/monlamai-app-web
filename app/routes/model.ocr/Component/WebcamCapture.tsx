@@ -2,7 +2,6 @@ import { Button } from "flowbite-react";
 import React, { useState } from "react";
 import Webcam from "react-webcam";
 import { TbCapture } from "react-icons/tb";
-import { MdFlipCameraIos } from "react-icons/md";
 
 const WebcamCapture = ({ setImageUrl }) => {
   const webcamRef = React.useRef(null);
